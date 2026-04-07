@@ -35,11 +35,13 @@ jobs:
         ssh-keyscan -H $EC2_PUBLIC_IP >> ~/.ssh/known_hosts
 
     - name: Replace placeholders in inventory file
+      working-directory: ansible-mysql
       run: |
         sed -i "s/{{ EC2_PUBLIC_IP }}/${{ secrets.EC2_PUBLIC_IP }}/g" hosts.ini
         sed -i "s|{{ SSH_PRIVATE_KEY_PATH }}|~/.ssh/id_rsa|g" hosts.ini
 
     - name: Run Ansible Playbook
+      working-directory: ansible-mysql
       run: |
        ansible-playbook -i hosts.ini install_mysql.yml
 
