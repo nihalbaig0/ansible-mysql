@@ -10,13 +10,18 @@
       apt: 
         update_cache: yes
     
-    - name:  Install MySQL server and Python MySQL library
+    - name: Install MySQL server and Python MySQL library
       apt: 
         name: "{{ item }}"
         state: present
       loop:
         - mysql-server
         - python3-mysqldb
+
+    - name: Wait for SSH to come back after install
+      wait_for_connection:
+        delay: 10
+        timeout: 60
 
     - name: Start and enable MySQL service
       service:
@@ -26,7 +31,7 @@
     
     - name: Check if MySQL root password is already set
       shell: >
-        mysql -u root -p '{{mysql_root_password}}' -e "SELECT 1" > /dev/null 2>&1
+        mysql -u root -p'{{ mysql_root_password }}' -e "SELECT 1" > /dev/null 2>&1
       ignore_errors: yes
       register: mysql_root_password_check
 
@@ -45,7 +50,7 @@
         login_password: "{{ mysql_root_password }}"
         name: root
         host_all: yes
-        password: "{{mysql_root_password}}"
+        password: "{{ mysql_root_password }}"
       when: not mysql_root_password_check.failed
 
     - name: Remove anonymous users
@@ -80,5 +85,3 @@
         query: "FLUSH PRIVILEGES"
         login_user: root
         login_password: "{{ mysql_root_password }}"
-    
-      
